@@ -1,5 +1,25 @@
 <img src="LANDrop/icons/banner.png" width="300">
 
+## Declare
+> This project is derived from [LANDrop](https://github.com/LANDrop/LANDrop). Thanks for the origin developers @yvbbrjdr and @
+tmacychen.
+
+This project is going to develop more features including "transfer text", "transfer screenshot", "transfer in IPv6 WAN" and so on.
+
+## New Features
+- support for adding host Manully, which enables you to transfer files to any devices that can be located.(has public IPv4 address or public IPv6 address)
+
+## Features to Develop
+- transfer text
+- transfer screenshot
+- transfer file through right-clicking menu
+
+## Download
+
+You can download the installer from [Github release](https://github.com/WanMotion/LANDrop-Pro/releases)
+
+
+# Origin
 ![Package](https://github.com/LANDrop/LANDrop/workflows/Package/badge.svg)
 
 > Drop any files to any devices on your LAN. No need to use instant messaging for that anymore.
