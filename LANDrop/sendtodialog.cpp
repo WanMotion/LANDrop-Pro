@@ -32,11 +32,14 @@
 
 #include <QMessageBox>
 #include <QPushButton>
+#include <QJsonDocument>
 
 #include "filetransferdialog.h"
 #include "filetransfersender.h"
 #include "sendtodialog.h"
 #include "ui_sendtodialog.h"
+
+#define HOST_MANUL_FILE "hosts.json"
 
 SendToDialog::SendToDialog(QWidget *parent, const QList<QSharedPointer<QFile>> &files,
                            DiscoveryService &discoveryService) :
@@ -75,6 +78,35 @@ SendToDialog::SendToDialog(QWidget *parent, const QList<QSharedPointer<QFile>> &
 
     connect(&socketTimeoutTimer, &QTimer::timeout, this, &SendToDialog::socketTimeout);
     socketTimeoutTimer.setSingleShot(true);
+
+    // read hosts file
+    QFile file(HOST_MANUL_FILE);
+    if(file.exists()&&!file.open(QIODevice::ReadOnly)){
+        QMessageBox::critical(this, QApplication::applicationName(),
+                              tr("Error! When open hosts.json!"));
+        return;
+    }
+    if(!file.exists()){
+        return;
+    }
+    QByteArray data(file.readAll());
+    file.close();
+    QJsonParseError jsonErr;
+    QJsonDocument jsonDoc=QJsonDocument::fromJson(data,&jsonErr);
+    if(jsonErr.error!=QJsonParseError::NoError){
+        QMessageBox::critical(this, QApplication::applicationName(),
+                              tr("Parse json Failed!"));
+        return;
+    }
+    jsonObj=jsonDoc.object();
+    QStringList l=hostsManulStringListModel.stringList();
+    for(QJsonObject::iterator iter=jsonObj.begin();iter!=jsonObj.end();iter++){
+        l.append(iter.key());
+        QString addr=iter.value().toObject().value("host").toString();
+        quint16 port=iter.value().toObject().value("port").toInt();
+        endpointsManul.push_back({addr,port});
+    }
+    hostsManulStringListModel.setStringList(l);
 }
 
 SendToDialog::~SendToDialog()
@@ -88,7 +120,7 @@ void SendToDialog::newHost(const QString &deviceName, const QHostAddress &addr, 
     QStringList l = hostsStringListModel.stringList();
     if (port == 0) {
         for (int i = 0; i < endpoints.size(); ++i) {
-            if (endpoints[i].addr.isEqual(addr)) {
+            if (endpoints[i].addr==addr.toString()) {
                 endpoints.removeAt(i);
                 l.removeAt(i);
                 hostsStringListModel.setStringList(l);
@@ -98,7 +130,7 @@ void SendToDialog::newHost(const QString &deviceName, const QHostAddress &addr, 
         return;
     }
     for (int i = 0; i < endpoints.size(); ++i) {
-        if (endpoints[i].addr.isEqual(addr)) {
+        if (endpoints[i].addr==addr.toString()) {
             if (l.at(i) != deviceName) {
                 l.replace(i, deviceName);
                 hostsStringListModel.setStringList(l);
@@ -107,7 +139,7 @@ void SendToDialog::newHost(const QString &deviceName, const QHostAddress &addr, 
             return;
         }
     }
-    endpoints.append({addr, port});
+    endpoints.append({addr.toString(), port});
     l.append(deviceName);
     hostsStringListModel.setStringList(l);
 }
@@ -115,10 +147,7 @@ void SendToDialog::newHost(const QString &deviceName, const QHostAddress &addr, 
 void SendToDialog::hostsListViewClicked(const QModelIndex &index)
 {
     Endpoint endpoint = endpoints[index.row()];
-    bool isV4;
-    quint32 ipv4 = endpoint.addr.toIPv4Address(&isV4);
-    QString addr = isV4 ? QHostAddress(ipv4).toString() : endpoint.addr.toString();
-    ui->addrLineEdit->setText(addr);
+    ui->addrLineEdit->setText(endpoints[index.row()].addr);
     ui->portLineEdit->setText(QString::number(endpoint.port));
 }
 
@@ -182,10 +211,7 @@ void SendToDialog::socketTimeout()
 void SendToDialog::hostsListViewManulClicked(const QModelIndex &index)
 {
     Endpoint endpoint = endpointsManul[index.row()];
-    bool isV4;
-    quint32 ipv4 = endpoint.addr.toIPv4Address(&isV4);
-    QString addr = isV4 ? QHostAddress(ipv4).toString() : endpoint.addr.toString();
-    ui->addrLineEdit->setText(addr);
+    ui->addrLineEdit->setText(endpointsManul[index.row()].addr);
     ui->portLineEdit->setText(QString::number(endpoint.port));
     ui->deleteButton->setEnabled(true);
 }
@@ -195,41 +221,43 @@ void SendToDialog::showAddHostsManulDialog()
     addHostDialog->setVisible(true);
 }
 
-void SendToDialog::addHostManul(const QString &deviceName, const QHostAddress &addr, quint16 port)
+void SendToDialog::addHostManul(const QString &deviceName, const QString &addr, quint16 port)
 {
     QStringList l = hostsManulStringListModel.stringList();
-    if (port == 0) {
-        for (int i = 0; i < endpointsManul.size(); ++i) {
-            if (endpointsManul[i].addr.isEqual(addr)) {
-                endpointsManul.removeAt(i);
-                l.removeAt(i);
-                hostsManulStringListModel.setStringList(l);
-                return;
-            }
-        }
-        return;
-    }
-    for (int i = 0; i < endpointsManul.size(); ++i) {
-        if (endpointsManul[i].addr.isEqual(addr)) {
-            if (l.at(i) != deviceName) {
-                l.replace(i, deviceName);
-                hostsManulStringListModel.setStringList(l);
-            }
-            endpointsManul[i].port = port;
-            return;
-        }
-    }
+    QJsonValue addrValue(addr);
+    QJsonValue portValue(port);
+    QJsonObject obj;
+    obj["host"]=addrValue;
+    obj["port"]=portValue;
+    jsonObj[deviceName]=obj;
     endpointsManul.append({addr, port});
     l.append(deviceName);
     hostsManulStringListModel.setStringList(l);
+    writeHostsJson();
 }
 
 void SendToDialog::onDeleteButtonClicked()
 {
     QModelIndex index=ui->hostsListViewManul->currentIndex();
+    jsonObj.remove(hostsManulStringListModel.stringList().at(index.row()));
     hostsManulStringListModel.removeRow(index.row());
     endpointsManul.removeAt(index.row());
     ui->addrLineEdit->setText("");
     ui->portLineEdit->setText("");
     ui->deleteButton->setEnabled(false);
+    writeHostsJson();
+}
+
+void SendToDialog::writeHostsJson()
+{
+    QFile file(HOST_MANUL_FILE);
+    if(!file.open(QIODevice::WriteOnly)){
+        QMessageBox::critical(this, QApplication::applicationName(),
+                              tr("Error! When open hosts.json!"));
+        return;
+    }
+    QJsonDocument jsonDoc(jsonObj);
+    QByteArray data=jsonDoc.toJson();
+    file.write(data);
+    file.close();
 }

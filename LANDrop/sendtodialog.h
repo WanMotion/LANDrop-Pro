@@ -37,6 +37,7 @@
 #include <QStringListModel>
 #include <QTcpSocket>
 #include <QTimer>
+#include <QJsonObject>
 
 #include "discoveryservice.h"
 #include "addhostsmanuldialog.h"
@@ -57,7 +58,7 @@ private:
     QStringListModel hostsStringListModel;
     QStringListModel hostsManulStringListModel;
     struct Endpoint {
-        QHostAddress addr;
+        QString addr;
         quint16 port;
     };
     QVector<Endpoint> endpoints;
@@ -66,6 +67,9 @@ private:
     QTcpSocket *socket;
     QTimer socketTimeoutTimer;
     AddHostsManulDialog *addHostDialog;
+    QJsonObject jsonObj;
+
+    void writeHostsJson();
 
 private slots:
     void newHost(const QString &deviceName, const QHostAddress &addr, quint16 port);
@@ -76,6 +80,6 @@ private slots:
     void socketTimeout();
     void hostsListViewManulClicked(const QModelIndex &index);
     void showAddHostsManulDialog();
-    void addHostManul(const QString &deviceName, const QHostAddress &addr, quint16 port);
+    void addHostManul(const QString &deviceName, const QString &addr, quint16 port);
     void onDeleteButtonClicked();
 };

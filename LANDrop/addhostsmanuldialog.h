@@ -20,7 +20,7 @@ private:
     Ui::AddHostsManulDialog *ui;
 
 signals:
-    void addHostManully(const QString &deviceName, const QHostAddress &addr, quint16 port);
+    void addHostManully(const QString &deviceName, const QString &addr, quint16 port);
 private slots:
     void accept();
 };

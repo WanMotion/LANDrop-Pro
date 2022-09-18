@@ -28,12 +28,6 @@ void AddHostsManulDialog::accept()
                               tr("Invalid Host"));
         return;
     }
-    QHostAddress hostAddr(host);
-    if(hostAddr.isNull()){
-        QMessageBox::critical(this, QApplication::applicationName(),
-                              tr("Invalid Host"));
-        return;
-    }
     bool ok;
     quint16 port=ui->portLineEdit->text().toUShort(&ok);
     if(!ok){
@@ -41,6 +35,6 @@ void AddHostsManulDialog::accept()
                               tr("Invalid port. Please enter a number between 1 and 65535."));
         return;
     }
-    emit addHostManully(deviceName,hostAddr,port);
+    emit addHostManully(deviceName,host,port);
     this->setVisible(false);
 }
