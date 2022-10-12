@@ -47,8 +47,6 @@ public:
     explicit FileTransferSession(QObject *parent, QTcpSocket *socket);
     void start();
     virtual void respond(bool accepted);
-//    bool is_skip=false,for_all=false;//ZZL: Add: used for file replace and skip policy.
-//    bool exit_msgb=false;
 protected:
     enum State {
         HANDSHAKE1,
@@ -72,9 +70,6 @@ signals:
     void printMessage(const QString &msg);
     void updateProgress(double progress);
     void errorOccurred(const QString &msg);
-    //void file_duplicated(const QString& msg);//ZZL: FIX: FIX the problem of local files being overwritten by files with the same name
-    //void user_choices(bool replace,bool for_all);
-
     void fileMetadataReady(const QList<FileTransferSession::FileMetadata> &metadata, quint64 totalSize,
                            const QString &deviceName, const QString &sessionKeyDigest);
     void ended();

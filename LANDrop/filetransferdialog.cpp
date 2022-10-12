@@ -46,7 +46,6 @@ FileTransferDialog::FileTransferDialog(QWidget *parent, FileTransferSession *ses
     questionBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
     questionBox.setDefaultButton(QMessageBox::Yes);
     connect(&questionBox, &QMessageBox::finished, this, &FileTransferDialog::respond);
-    //connect(&file_dup_box,&QMessageBox::finished,this,&FileTransferDialog::respond_file_dup);
 
     session->setParent(this);
     connect(session, &FileTransferSession::printMessage, ui->statusLabel, &QLabel::setText);
@@ -55,8 +54,6 @@ FileTransferDialog::FileTransferDialog(QWidget *parent, FileTransferSession *ses
     connect(session, &FileTransferSession::fileMetadataReady, this, &FileTransferDialog::sessionFileMetadataReady);
     connect(session, &FileTransferSession::ended, this, &FileTransferDialog::accept);
 
-    //connect(session,&FileTransferSession::file_duplicated,this,&FileTransferDialog::session_file_duplicated);//zzl:
-
     session->start();
 }
 
@@ -64,15 +61,6 @@ FileTransferDialog::~FileTransferDialog()
 {
     delete ui;
 }
-
-//void FileTransferDialog::respond_file_dup()
-//{
-//    qDebug()<<"after exec";
-//    session->is_skip=file_dup_box.clickedButton()==file_dup_box.buttons().first();
-//    session->for_all=file_dup_box.checkBox()->isChecked();
-//    session->exit_msgb=true;
-//    qDebug()<<"return from dialog";
-//}
 
 void FileTransferDialog::respond(int result)
 {
@@ -103,7 +91,6 @@ void FileTransferDialog::sessionFileMetadataReady(const QList<FileTransferSessio
                                                   const QString &sessionKeyDigest)
 {
     show();
-
     QString totalSizeStr = locale().formattedDataSize(totalSize, 2, QLocale::DataSizeTraditionalFormat);
     QString msg;
     if (metadata.size() == 1) {
@@ -119,17 +106,3 @@ void FileTransferDialog::sessionFileMetadataReady(const QList<FileTransferSessio
     questionBox.setText(msg);
     questionBox.show();
 }
-
-//void FileTransferDialog::session_file_duplicated(const QString& msg)//ZZL: FIX: FIX the problem of local files being overwritten by files with the same name
-//{
-//    show();
-//    qDebug()<<"after emit";
-//    QString filename=msg;
-//    //msg_file_dup.setWindowModality(Qt::ApplicationModal);
-//    file_dup_box.setWindowTitle(tr("Replace or skip files"));
-//    file_dup_box.setText(tr("The target path already contains a file named %1").arg(filename));
-//    QCheckBox cb_all(tr("For all file"));
-//    file_dup_box.setCheckBox(&cb_all);
-//    qDebug()<<"before show";
-//    file_dup_box.show();
-//}

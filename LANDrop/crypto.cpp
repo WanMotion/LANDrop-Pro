@@ -106,9 +106,8 @@ QByteArray Crypto::decrypt(const QByteArray &data)
                                                   reinterpret_cast<const unsigned char *>(cipherText.data()), cipherText.size(),
                                                   nullptr, 0,
                                                   reinterpret_cast<const unsigned char *>(nonce.data()),
-                                                  reinterpret_cast<const unsigned char *>(sessionKey.data())) != 0){
+                                                  reinterpret_cast<const unsigned char *>(sessionKey.data())) != 0)
         throw std::runtime_error(tr("Decryption failed.").toUtf8().toStdString());
-    }
     return plainText.left(plainTextLen);
 }
 
