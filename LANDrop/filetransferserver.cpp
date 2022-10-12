@@ -57,7 +57,7 @@ void FileTransferServer::serverNewConnection()
 {
     while (server.hasPendingConnections()) {
         FileTransferReceiver *receiver = new FileTransferReceiver(nullptr, server.nextPendingConnection());
-        FileTransferDialog *d = new FileTransferDialog(nullptr, receiver);
+        FileTransferDialog *d = new FileTransferDialog(nullptr,receiver);
         d->setAttribute(Qt::WA_DeleteOnClose);
     }
 }

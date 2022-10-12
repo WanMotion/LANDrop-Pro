@@ -33,6 +33,9 @@
 #pragma once
 
 #include <QFile>
+#include <QMessageBox>
+#include<QCheckBox>
+#include<QAbstractButton>
 
 #include "filetransfersession.h"
 

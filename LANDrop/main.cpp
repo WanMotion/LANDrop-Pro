@@ -51,7 +51,7 @@ int main(int argc, char *argv[])
 
     QTranslator appTranslator;
     appTranslator.load(a.applicationName() + '.' + QLocale::system().name(), ":/locales", "", ".qm");
-    a.installTranslator(&appTranslator);
+    //a.installTranslator(&appTranslator);
 
     try {
         if (!QSystemTrayIcon::isSystemTrayAvailable())

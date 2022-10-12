@@ -36,6 +36,7 @@
 #include <QFile>
 #include <QMessageBox>
 #include <QTcpSocket>
+#include <QCheckBox>
 
 #include "filetransfersession.h"
 
@@ -53,10 +54,14 @@ private:
     FileTransferSession *session;
     bool errored;
     QMessageBox questionBox;
+    //QMessageBox file_dup_box;
 private slots:
     void respond(int result);
+    //void respond_file_dup();
     void sessionUpdateProgress(double progress);
     void sessionErrorOccurred(const QString &msg);
     void sessionFileMetadataReady(const QList<FileTransferSession::FileMetadata> &metadata, quint64 totalSize,
                                   const QString &deviceName, const QString &sessionKeyDigest);
+
+    //void session_file_duplicated(const QString &msg);
 };
