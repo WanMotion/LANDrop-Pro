@@ -84,8 +84,8 @@ unix {
 }
 
 win32 {
-    INCLUDEPATH += "D:/libs/libsodium/include"
-    LIBS += "-LD:/libs/libsodium/x64/Debug/v141/dynamic" -llibsodium
+    INCLUDEPATH += "D:/programming/QT/LANDrop-Pro/libsodium/include"
+    LIBS += "-LD:/programming/QT/LANDrop-Pro/libsodium/x64/Release/v141/dynamic" -llibsodium
 }
 
 QMAKE_INFO_PLIST = Info.plist

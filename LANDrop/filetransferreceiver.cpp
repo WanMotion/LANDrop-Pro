@@ -37,12 +37,14 @@
 #include <QJsonObject>
 #include <QTimer>
 #include <QUrl>
+#include<QDebug>
 
 #include "filetransferreceiver.h"
 #include "settings.h"
 
 FileTransferReceiver::FileTransferReceiver(QObject *parent, QTcpSocket *socket) :
-    FileTransferSession(parent, socket), writingFile(nullptr), downloadPath(Settings::downloadPath()) {}
+    FileTransferSession(parent, socket), writingFile(nullptr), downloadPath(Settings::downloadPath()) {
+}
 
 void FileTransferReceiver::respond(bool accepted)
 {
@@ -148,6 +150,11 @@ void FileTransferReceiver::createNextFile()
             writingFile = nullptr;
         }
         writingFile = new QFile(filename, this);
+        if(writingFile->exists()){ //ZZL: FIX: FIX the problem of local files being overwritten by files with the same name
+            QDateTime datetime=QDateTime::currentDateTime();
+            filename=downloadPath + QDir::separator()+datetime.toString("yyyy.MM.dd.hh.mm.ss.zzz-")+curFile.filename;
+            writingFile->setFileName(filename);
+        }
         if (!writingFile->open(QIODevice::WriteOnly)) {
             emit errorOccurred(tr("Unable to open file %1.").arg(filename));
             return;
@@ -168,5 +175,6 @@ void FileTransferReceiver::createNextFile()
         emit printMessage(tr("Done!"));
         socket->disconnectFromHost();
         QTimer::singleShot(5000, this, &FileTransferSession::ended);
+        this->deleteLater();//ZZL: maybe?
     }
 }

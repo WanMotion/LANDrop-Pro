@@ -36,6 +36,7 @@
 #include <QFile>
 #include <QMessageBox>
 #include <QTcpSocket>
+#include <QCheckBox>
 
 #include "filetransfersession.h"
 

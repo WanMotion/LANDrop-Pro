@@ -53,6 +53,7 @@ FileTransferDialog::FileTransferDialog(QWidget *parent, FileTransferSession *ses
     connect(session, &FileTransferSession::errorOccurred, this, &FileTransferDialog::sessionErrorOccurred);
     connect(session, &FileTransferSession::fileMetadataReady, this, &FileTransferDialog::sessionFileMetadataReady);
     connect(session, &FileTransferSession::ended, this, &FileTransferDialog::accept);
+
     session->start();
 }
 
@@ -90,7 +91,6 @@ void FileTransferDialog::sessionFileMetadataReady(const QList<FileTransferSessio
                                                   const QString &sessionKeyDigest)
 {
     show();
-
     QString totalSizeStr = locale().formattedDataSize(totalSize, 2, QLocale::DataSizeTraditionalFormat);
     QString msg;
     if (metadata.size() == 1) {
